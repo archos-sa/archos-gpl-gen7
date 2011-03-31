@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export LD_PRELOAD=/opt/usr/sbin/sambafsmon.so.1.0.1
+/opt/usr/sbin/smbd -D
