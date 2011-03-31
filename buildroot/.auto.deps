@@ -1,0 +1,16 @@
+# ATTENTION! This does not handle 'depends', just 'select'! 
+# See package/config/util.c write_make_deps()
+#
+arm_omap3_3430sdp: $(BASE_TARGETS) linux arm_eabi kernel_headers_2_6_22 pthreads arm1176jzf_s
+install_libstdcpp: $(BASE_TARGETS) largefile gcc_cross_cxx
+gdb: $(BASE_TARGETS) ncurses ncurses
+ ncurses ncurses
+gdb: $(BASE_TARGETS) ncurses ncurses
+ ncurses ncurses
+fusesmb: $(BASE_TARGETS) fuse samba
+ltrace: $(BASE_TARGETS) libelf_headers
+e2fsprogs_findfs: $(BASE_TARGETS) e2fsprogs_e2label
+e2fsprogs_tune2fs: $(BASE_TARGETS) e2fsprogs_e2label
+mtd: $(BASE_TARGETS) zlib
+mtd_utils: $(BASE_TARGETS) lzo
+rootfs_cramfs: $(BASE_TARGETS) host_fakeroot

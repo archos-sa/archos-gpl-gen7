@@ -1,0 +1,110 @@
+diff -uwbr ffmpeg_tiny_org/libavcodec/Makefile ffmpeg_tiny/libavcodec/Makefile
+--- ffmpeg_tiny_org/libavcodec/Makefile	2009-05-12 21:56:48.000000000 +0200
++++ ffmpeg_tiny/libavcodec/Makefile	2009-05-25 19:46:35.000000000 +0200
+@@ -9,26 +9,19 @@
+        audioconvert.o                                                   \
+        avpacket.o                                                       \
+        bitstream.o                                                      \
+-       bitstream_filter.o                                               \
+-       dsputil.o                                                        \
+        eval.o                                                           \
+-       faanidct.o                                                       \
+-       imgconvert.o                                                     \
+-       jrevdct.o                                                        \
+        opt.o                                                            \
+        options.o                                                        \
+        parser.o                                                         \
+-       raw.o                                                            \
+        resample.o                                                       \
+        resample2.o                                                      \
+-       simple_idct.o                                                    \
+        utils.o                                                          \
+ 
+ # parts needed for many different codecs
+ OBJS-$(CONFIG_AANDCT)                  += aandcttab.o
+ OBJS-$(CONFIG_ENCODERS)                += faandct.o jfdctfst.o jfdctint.o
+ OBJS-$(CONFIG_FFT)                     += fft.o
+-OBJS-$(CONFIG_GOLOMB)                  += golomb.o
++#OBJS-$(CONFIG_GOLOMB)                  += golomb.o
+ OBJS-$(CONFIG_MDCT)                    += mdct.o
+ OBJS-$(CONFIG_RDFT)                    += rdft.o
+ 
+Only in ffmpeg_tiny_org/libavcodec: raw.o
+Only in ffmpeg_tiny_org/libavcodec: resample2.o
+Only in ffmpeg_tiny_org/libavcodec: resample.o
+Only in ffmpeg_tiny_org/libavcodec: simple_idct.o
+diff -uwbr ffmpeg_tiny_org/libavcodec/utils.c ffmpeg_tiny/libavcodec/utils.c
+--- ffmpeg_tiny_org/libavcodec/utils.c	2009-04-24 01:14:26.000000000 +0200
++++ ffmpeg_tiny/libavcodec/utils.c	2009-05-25 19:38:52.000000000 +0200
+@@ -252,6 +252,7 @@
+         pic->age= *picture_number - buf->last_pic_num;
+         buf->last_pic_num= *picture_number;
+     }else{
++#if 0
+         int h_chroma_shift, v_chroma_shift;
+         int size[4] = {0};
+         int tmpsize;
+@@ -325,6 +326,7 @@
+         buf->height = s->height;
+         buf->pix_fmt= s->pix_fmt;
+         pic->age= 256*256*256*64;
++#endif
+     }
+     pic->type= FF_BUFFER_TYPE_INTERNAL;
+ 
+@@ -397,9 +399,11 @@
+     /* Allocate new frame */
+     if (s->get_buffer(s, pic))
+         return -1;
++#if 0
+     /* Copy image data from old buffer to new buffer */
+     av_picture_copy((AVPicture*)pic, (AVPicture*)&temp_pic, s->pix_fmt, s->width,
+              s->height);
++#endif
+     s->release_buffer(s, &temp_pic); // Release old frame
+     return 0;
+ }
+@@ -415,7 +419,7 @@
+ }
+ 
+ enum PixelFormat avcodec_default_get_format(struct AVCodecContext *s, const enum PixelFormat *fmt){
+-    while (*fmt != PIX_FMT_NONE && ff_is_hwaccel_pix_fmt(*fmt))
++    while (*fmt != PIX_FMT_NONE /*&& ff_is_hwaccel_pix_fmt(*fmt)*/)
+         ++fmt;
+     return fmt[0];
+ }
+@@ -757,9 +761,11 @@
+                  "Video: %s%s",
+                  codec_name, enc->mb_decision ? " (hq)" : "");
+         if (enc->pix_fmt != PIX_FMT_NONE) {
++#if 0
+             snprintf(buf + strlen(buf), buf_size - strlen(buf),
+                      ", %s",
+                      avcodec_get_pix_fmt_name(enc->pix_fmt));
++#endif
+         }
+         if (enc->width) {
+             snprintf(buf + strlen(buf), buf_size - strlen(buf),
+@@ -886,7 +892,7 @@
+         return;
+     initialized = 1;
+ 
+-    dsputil_static_init();
++    //dsputil_static_init();
+ }
+ 
+ void avcodec_flush_buffers(AVCodecContext *avctx)
+diff -uwbr ffmpeg_tiny_org/libavformat/utils.c ffmpeg_tiny/libavformat/utils.c
+--- ffmpeg_tiny_org/libavformat/utils.c	2009-04-13 05:38:55.000000000 +0200
++++ ffmpeg_tiny/libavformat/utils.c	2009-05-25 19:29:11.000000000 +0200
+@@ -2160,8 +2160,9 @@
+         st = ic->streams[i];
+         if (st->codec->codec_type == CODEC_TYPE_VIDEO) {
+             if(st->codec->codec_id == CODEC_ID_RAWVIDEO && !st->codec->codec_tag && !st->codec->bits_per_coded_sample)
++#if 0
+                 st->codec->codec_tag= avcodec_pix_fmt_to_codec_tag(st->codec->pix_fmt);
+-
++#endif
+             // the check for tb_unreliable() is not completely correct, since this is not about handling
+             // a unreliable/inexact time base, but a time base that is finer than necessary, as e.g.
+             // ipmovie.c produces.
