@@ -10,7 +10,7 @@ GMP_CAT:=$(BZCAT)
 GMP_DIR:=$(TOOL_BUILD_DIR)/gmp-$(GMP_VERSION)
 GMP_TARGET_DIR:=$(BUILD_DIR)/gmp-$(GMP_VERSION)
 GMP_BINARY:=libgmp$(LIBTGTEXT)
-GMP_HOST_BINARY:=libgmp$(HOST_SHREXT)
+GMP_HOST_BINARY:=libgmp$(HOST_LIBEXT)
 GMP_LIBVERSION:=3.4.2
 
 # this is a workaround for a bug in GMP, please see
@@ -54,7 +54,7 @@ $(STAGING_DIR)/usr/lib/$(GMP_BINARY): $(GMP_TARGET_DIR)/.libs/$(GMP_BINARY)
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(GMP_TARGET_DIR) install
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(STAGING_DIR)/usr/lib/libgmp$(LIBTGTEXT)*
 
-$(TARGET_DIR)/usr/lib/libgmp.so $(TARGET_DIR)/usr/lib/libgmp.so.$(GMP_LIBVERSION) $(TARGET_DIR)/usr/lib/libgmp.a: $(STAGING_DIR)/usr/lib/$(GMP_BINARY)
+$(TARGET_DIR)/usr/lib/libgmp.a: $(STAGING_DIR)/usr/lib/$(GMP_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libgmp$(LIBTGTEXT)* $(TARGET_DIR)/usr/lib/
 ifeq ($(BR2_PACKAGE_LIBGMP_HEADERS),y)
 	test -d $(TARGET_DIR)/usr/include || mkdir -p $(TARGET_DIR)/usr/include
@@ -83,13 +83,13 @@ $(GMP_DIR2)/.configured: $(GMP_DIR)/.unpacked
 		--prefix="$(GMP_HOST_DIR)" \
 		--build=$(GNU_HOST_NAME) \
 		--host=$(GNU_HOST_NAME) \
-		--enable-shared \
+		--disable-shared \
 		--enable-static \
 		$(DISABLE_NLS) \
 	)
 	touch $@
 
-$(GMP_HOST_DIR)/lib/libgmp$(HOST_LIBEXT) $(GMP_HOST_DIR)/lib/libgmp$(HOST_SHREXT) $(GMP_HOST_DIR)/lib/libgmp$(HOST_SHREXT).(GMP_LIBVERSION): $(GMP_DIR2)/.configured
+$(GMP_HOST_DIR)/lib/libgmp$(HOST_LIBEXT): $(GMP_DIR2)/.configured
 	$(MAKE) -C $(GMP_DIR2) install
 
 host-libgmp: $(GMP_HOST_DIR)/lib/$(GMP_HOST_BINARY)

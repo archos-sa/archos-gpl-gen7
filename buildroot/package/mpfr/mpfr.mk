@@ -12,7 +12,7 @@ MPFR_SITE:=http://www.mpfr.org/mpfr-$(MPFR_VERSION)/
 MPFR_DIR:=$(TOOL_BUILD_DIR)/mpfr-$(MPFR_VERSION)
 MPFR_TARGET_DIR:=$(BUILD_DIR)/mpfr-$(MPFR_VERSION)
 MPFR_BINARY:=libmpfr$(LIBTGTEXT)
-MPFR_HOST_BINARY:=libmpfr$(HOST_SHREXT)
+MPFR_HOST_BINARY:=libmpfr$(HOST_LIBEXT)
 MPFR_LIBVERSION:=1.0.1
 
 # No patch
@@ -70,7 +70,7 @@ $(STAGING_DIR)/usr/lib/$(MPFR_BINARY): $(MPFR_TARGET_DIR)/.libs/$(MPFR_BINARY)
 	$(MAKE) DESTDIR=$(STAGING_DIR) -C $(MPFR_TARGET_DIR) install
 	$(STRIPCMD) $(STRIP_STRIP_UNNEEDED) $(STAGING_DIR)/usr/lib/libmpfr$(LIBTGTEXT)*
 
-$(TARGET_DIR)/usr/lib/libmpfr.so $(TARGET_DIR)/usr/lib/libmpfr.so.$(MPFR_LIBVERSION) $(TARGET_DIR)/usr/lib/libmpfr.a: $(STAGING_DIR)/usr/lib/$(MPFR_BINARY)
+$(TARGET_DIR)/usr/lib/libmpfr.a: $(STAGING_DIR)/usr/lib/$(MPFR_BINARY)
 	cp -dpf $(STAGING_DIR)/usr/lib/libmpfr$(LIBTGTEXT)* $(TARGET_DIR)/usr/lib/
 ifeq ($(BR2_PACKAGE_LIBMPFR_HEADERS),y)
 	cp -dpf $(STAGING_DIR)/usr/include/mpfr.h $(STAGING_DIR)/usr/include/mpf2mpfr.h \
@@ -100,14 +100,14 @@ $(MPFR_DIR2)/.configured: $(MPFR_DIR)/.unpacked $(GMP_HOST_DIR)/lib/$(GMP_HOST_B
 		--prefix="$(MPFR_HOST_DIR)" \
 		--build=$(GNU_HOST_NAME) \
 		--host=$(GNU_HOST_NAME) \
-		--enable-shared \
+		--disable-shared \
 		--enable-static \
 		--with-gmp=$(GMP_HOST_DIR) \
 		$(DISABLE_NLS) \
 	)
 	touch $@
 
-$(MPFR_HOST_DIR)/lib/libmpfr$(HOST_LIBEXT) $(MPFR_HOST_DIR)/lib/libmpfr$(HOST_SHREXT) $(MPFR_HOST_DIR)/lib/libmpfr$(HOST_SHREXT).$(MPFR_LIBVERSION): $(MPFR_DIR2)/.configured
+$(MPFR_HOST_DIR)/lib/libmpfr$(HOST_LIBEXT): $(MPFR_DIR2)/.configured
 	$(MAKE) -C $(MPFR_DIR2) install
 
 host-libmpfr: $(MPFR_HOST_DIR)/lib/$(MPFR_HOST_BINARY)
